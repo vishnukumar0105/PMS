@@ -1,0 +1,46 @@
+:root {
+  --green-dark: #1a5c33;
+  --surface: #f1f5f2;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--surface);
+}
+
+#root, .app-shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--green-dark);
+}
+
+.sidebar-btn {
+  color: rgba(255, 255, 255, 0.8) !important;
+  border: 0;
+}
+
+.sidebar-btn:hover,
+.sidebar-btn.active {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.main-panel {
+  background: #f5f8f6;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: #d2e6d8;
+  color: #1a5c33;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
