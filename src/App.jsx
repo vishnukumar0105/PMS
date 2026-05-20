@@ -1,97 +1,179 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-const menu = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'master', label: 'Master List' },
-  { key: 'upcoming', label: 'Upcoming Review List' },
-  { key: 'approval', label: 'Review Approval List' },
-  { key: 'discussion', label: 'Discussion List' },
-  { key: 'appraisal', label: 'Appraisal List' },
-  { key: 'beneficiary', label: 'Beneficiary List' }
+const menuSections = [
+  {
+    title: 'MAIN',
+    items: [
+      { key: 'dashboard', icon: '⊞', label: 'Dashboard' },
+      { key: 'master-list', icon: '☰', label: 'Master List' },
+      { key: 'upcoming-review-list', icon: '🗓', label: 'Upcoming Review List', badge: 19 },
+      { key: 'review-approval-list', icon: '✓', label: 'Review Approval List', badge: 5 },
+      { key: 'discussion-list', icon: '💬', label: 'Discussion List' }
+    ]
+  },
+  {
+    title: 'APPRAISAL',
+    items: [
+      { key: 'appraisal-list', icon: '📋', label: 'Appraisal List' },
+      { key: 'beneficiary-list', icon: '🎯', label: 'Beneficiary List' }
+    ]
+  },
+  {
+    title: 'RECORDS',
+    items: [
+      { key: 'attendance', icon: '📊', label: 'Attendance' },
+      { key: 'pa-scores', icon: '📈', label: 'PA Scores' },
+      { key: 'star-performance-awards', icon: '⭐', label: 'Star Performance Awards' },
+      { key: 'feedback-forms', icon: '📝', label: 'Feedback Forms' },
+      { key: 'review-history', icon: '🕘', label: 'Review History' }
+    ]
+  },
+  {
+    title: 'ADMIN',
+    items: [{ key: 'configuration', icon: '⚙', label: 'Configuration' }]
+  }
 ];
 
-const metrics = [
-  ['Total Employees', '650'],
-  ['Upcoming Review (June)', '19'],
-  ['Review Completed (May)', '10'],
-  ['Under Review (May)', '26'],
-  ['Review in Progress (May)', '16'],
-  ['Appraisal Beneficiary (May)', '16']
-];
-
-function Placeholder({ title }) {
-  return (
-    <div className="card p-4 shadow-sm border-0">
-      <h5 className="mb-2">{title}</h5>
-      <p className="text-secondary mb-0">
-        This page is scaffolded and ready. Next step: migrate the full HTML table/cards and attach API/state.
-      </p>
-    </div>
-  );
-}
+const pageContent = {
+  dashboard: {
+    title: 'Dashboard',
+    subtitle: 'HR performance command center',
+    description:
+      'Track review pipeline health, due dates, team completion trends, and actionable risks in one place.'
+  },
+  'master-list': {
+    title: 'Master List',
+    subtitle: 'Employee profile index',
+    description: 'Search and maintain employee appraisal records, review cycle metadata, and hierarchy mapping.'
+  },
+  'upcoming-review-list': {
+    title: 'Upcoming Review List',
+    subtitle: 'Review schedule planner',
+    description: 'View upcoming due dates and launch review workflow actions for selected employees.'
+  },
+  'review-approval-list': {
+    title: 'Review Approval List',
+    subtitle: 'Approval queue monitor',
+    description: 'Manage pending approvals, feedback dispatch status, and escalation timelines.'
+  },
+  'discussion-list': {
+    title: 'Discussion List',
+    subtitle: 'Discussion tracking',
+    description: 'Schedule review discussions, track outcomes, and capture HR comments and decisions.'
+  },
+  'appraisal-list': {
+    title: 'Appraisal List',
+    subtitle: 'Compensation recommendations',
+    description: 'Prepare finalized recommendations and send eligible records to CPO for approval.'
+  },
+  'beneficiary-list': {
+    title: 'Beneficiary List',
+    subtitle: 'Approved benefit roster',
+    description: 'Track approved increments, communication status, and acknowledgement submission.'
+  },
+  attendance: {
+    title: 'Attendance',
+    subtitle: 'Attendance intelligence',
+    description: 'Monitor attendance trends and identify review-impacting threshold violations.'
+  },
+  'pa-scores': {
+    title: 'PA Scores',
+    subtitle: 'Performance trend analysis',
+    description: 'Analyze PA trajectory by team, cycle, and employee-level ranking movement.'
+  },
+  'star-performance-awards': {
+    title: 'Star Performance Awards',
+    subtitle: 'Recognition ledger',
+    description: 'Review monthly recognition awards and their supporting appraisal context.'
+  },
+  'feedback-forms': {
+    title: 'Feedback Forms',
+    subtitle: 'Template and submission hub',
+    description: 'Manage form templates, completion rates, and reminder actions for active cycles.'
+  },
+  'review-history': {
+    title: 'Review History',
+    subtitle: 'Historical review archive',
+    description: 'Access complete appraisal chronology with scores, outcomes, and acknowledgement records.'
+  },
+  configuration: {
+    title: 'Configuration',
+    subtitle: 'HR policy controls',
+    description: 'Configure probation and review-cycle policy settings for future appraisals.'
+  }
+};
 
 export default function App() {
-  const [page, setPage] = useState('dashboard');
-  const title = useMemo(() => menu.find((m) => m.key === page)?.label ?? 'Dashboard', [page]);
+  const [activePage, setActivePage] = useState('dashboard');
+  const current = pageContent[activePage];
 
   return (
-    <div className="app-shell d-flex">
-      <aside className="sidebar p-3 d-flex flex-column">
-        <div className="brand mb-3 pb-3 border-bottom border-light-subtle">
-          <div className="fw-bold text-white">Information Evolution</div>
-          <small className="text-light opacity-75">PMS — HR Portal</small>
+    <div className="hr-app">
+      <aside className="hr-sidebar">
+        <div className="hr-brand">
+          <div className="hr-logo">IE</div>
+          <div>
+            <h1>Information Evolution</h1>
+            <p>PMS — HR Portal</p>
+          </div>
         </div>
 
-        <nav className="d-grid gap-1">
-          {menu.map((item) => (
-            <button
-              key={item.key}
-              className={`btn text-start sidebar-btn ${item.key === page ? 'active' : ''}`}
-              onClick={() => setPage(item.key)}
-            >
-              {item.label}
-            </button>
+        <div className="hr-menu-wrap">
+          {menuSections.map((section) => (
+            <section key={section.title} className="hr-menu-section">
+              <p className="hr-menu-title">{section.title}</p>
+              <nav>
+                {section.items.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`hr-menu-item ${activePage === item.key ? 'active' : ''}`}
+                    onClick={() => setActivePage(item.key)}
+                  >
+                    <span className="hr-menu-icon" aria-hidden="true">
+                      {item.icon}
+                    </span>
+                    <span className="hr-menu-label">{item.label}</span>
+                    {item.badge ? <span className="hr-menu-badge">{item.badge}</span> : null}
+                  </button>
+                ))}
+              </nav>
+            </section>
           ))}
-        </nav>
+        </div>
 
-        <div className="mt-auto text-light small pt-3 border-top border-light-subtle">Deepa Nair · HR Manager</div>
+        <footer className="hr-user">
+          <div className="hr-user-avatar">HR</div>
+          <div>
+            <h2>Deepa Nair</h2>
+            <p>HR Manager</p>
+          </div>
+        </footer>
       </aside>
 
-      <main className="main-panel flex-grow-1 d-flex flex-column">
-        <header className="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
-          <div>
-            <div className="text-secondary small">Performance Management</div>
-            <div className="fw-semibold">{title}</div>
+      <main className="hr-main">
+        <div className="hr-main-inner container-fluid">
+          <div className="hr-top-row">
+            <div>
+              <p className="hr-breadcrumb">Performance Management / HR Module</p>
+              <h3>{current.title}</h3>
+              <p className="hr-subtitle">{current.subtitle}</p>
+            </div>
+            <button type="button" className="btn btn-success px-4 rounded-pill">
+              + New Action
+            </button>
           </div>
-          <div className="d-flex align-items-center gap-2">
-            <button className="btn btn-outline-secondary btn-sm">🔔</button>
-            <div className="avatar">DN</div>
-          </div>
-        </header>
 
-        <section className="p-4 overflow-auto">
-          {page === 'dashboard' ? (
-            <>
-              <div className="alert alert-warning py-2">5 feedback forms pending submission.</div>
-              <div className="row g-3 mb-3">
-                {metrics.map(([label, val]) => (
-                  <div key={label} className="col-md-4 col-xl-2">
-                    <div className="card border-0 shadow-sm p-3 h-100">
-                      <div className="small text-secondary">{label}</div>
-                      <div className="display-6 text-success fw-semibold">{val}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="row g-3">
-                <div className="col-lg-6"><Placeholder title="Employee Allocation by Department" /></div>
-                <div className="col-lg-6"><Placeholder title="Department PA Completion Status" /></div>
-              </div>
-            </>
-          ) : (
-            <Placeholder title={title} />
-          )}
-        </section>
+          <div className="hr-placeholder-card">
+            <h4>{current.title}</h4>
+            <p>{current.description}</p>
+            <div className="hr-chip-row">
+              <span className="hr-chip">Modern UI baseline complete</span>
+              <span className="hr-chip">Menu aligned to provided design</span>
+              <span className="hr-chip">Ready for page-wise feature build</span>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
