@@ -228,3 +228,18 @@ body {
   background: #e4f2e8;
   color: #1d6334;
 }
+
+.login-page,
+.uc-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(160deg, #edf5ef 0%, #f7fbf8 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 16px;
+}
