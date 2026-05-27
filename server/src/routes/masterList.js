@@ -13,12 +13,10 @@ router.get('/master-list', async (req, res) => {
       discussionStatus = '',
       page = 1,
       pageSize = 50,
-      sortColumn = 'employeeid',
-      sortDirection = 'ASC'
     } = req.query;
 
     const [resultSets] = await pool.query(
-      'CALL sp_hr_master_list(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'CALL sp_hr_master_list_traditional(?, ?, ?, ?, ?, ?, ?)',
       [
         search,
         departmentId ? Number(departmentId) : null,
@@ -26,9 +24,7 @@ router.get('/master-list', async (req, res) => {
         locationId ? Number(locationId) : null,
         discussionStatus,
         Number(page),
-        Number(pageSize),
-        sortColumn,
-        sortDirection
+        Number(pageSize)
       ]
     );
 
