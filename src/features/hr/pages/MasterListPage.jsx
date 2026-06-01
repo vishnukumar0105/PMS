@@ -14,6 +14,7 @@ export default function MasterListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filtersLoading, setFiltersLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [filters, setFilters] = useState(defaultFilters);
   const [filterOptions, setFilterOptions] = useState({
     departments: [],
@@ -25,11 +26,13 @@ export default function MasterListPage() {
   const loadRows = async (nextFilters = filters) => {
     try {
       setLoading(true);
+      setErrorMessage('');
       const data = await getMasterList({ ...nextFilters, page: 1, pageSize: 50 });
       setRows(data.rows || []);
       setTotal(data.total || 0);
     } catch (error) {
       console.error(error);
+      setErrorMessage(error.message || 'Failed to load master list. Please check backend/DB setup.');
       setRows([]);
       setTotal(0);
     } finally {
@@ -41,6 +44,7 @@ export default function MasterListPage() {
     const loadInitialData = async () => {
       try {
         setFiltersLoading(true);
+        setErrorMessage('');
         const options = await getMasterListFilters();
         setFilterOptions({
           departments: options.departments || [],
@@ -50,6 +54,7 @@ export default function MasterListPage() {
         });
       } catch (error) {
         console.error(error);
+        setErrorMessage(error.message || 'Failed to load filter dropdowns. Please check backend/DB setup.');
       } finally {
         setFiltersLoading(false);
       }
@@ -106,6 +111,10 @@ export default function MasterListPage() {
           </select>
           <button className="btn btn-light" onClick={handleFilter} disabled={loading}>Filter ▾</button>
         </div>
+
+        {errorMessage ? (
+          <div className="alert alert-danger py-2">{errorMessage}</div>
+        ) : null}
 
         {loading ? (
           <div className="p-3">Loading master list...</div>

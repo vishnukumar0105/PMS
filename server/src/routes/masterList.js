@@ -3,6 +3,16 @@ import { pool } from '../db/mysql.js';
 
 const router = Router();
 
+function sendDbError(res, error, message) {
+  console.error(message, error);
+  return res.status(500).json({
+    message,
+    errorCode: error.code,
+    sqlState: error.sqlState,
+    sqlMessage: error.sqlMessage || error.message
+  });
+}
+
 router.get('/master-list/filters', async (_, res) => {
   try {
     const [resultSets] = await pool.query(
@@ -17,8 +27,7 @@ router.get('/master-list/filters', async (_, res) => {
       discussionStatuses: resultSets?.[3] ?? []
     });
   } catch (error) {
-    console.error('Master list filter API error:', error);
-    return res.status(500).json({ message: 'Failed to load master list filters' });
+    return sendDbError(res, error, 'Failed to load master list filters');
   }
 });
 
@@ -52,8 +61,7 @@ router.get('/master-list', async (req, res) => {
     const total = resultSets?.[1]?.[0]?.total_records ?? 0;
     return res.json({ rows, total });
   } catch (error) {
-    console.error('Master list API error:', error);
-    return res.status(500).json({ message: 'Failed to load master list' });
+    return sendDbError(res, error, 'Failed to load master list');
   }
 });
 
