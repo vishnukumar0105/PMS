@@ -3,18 +3,18 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS sp_hr_master_list_flag_method $$
 CREATE PROCEDURE sp_hr_master_list_flag_method(
     IN intFlag INT,
-    IN p_search VARCHAR(150),
-    IN p_department_id BIGINT,
-    IN p_appraisal_type_id BIGINT,
-    IN p_location_id BIGINT,
-    IN p_discussion_status VARCHAR(50),
-    IN p_page_number INT,
-    IN p_page_size INT
+    IN strsearch VARCHAR(150),
+    IN intdepartmentid BIGINT,
+    IN intappraisaltypeid BIGINT,
+    IN intlocationid BIGINT,
+    IN strdiscussionstatus VARCHAR(50),
+    IN intpagenumber INT,
+    IN intpagesize INT
 )
 BEGIN
     DECLARE v_offset INT DEFAULT 0;
 
-    IF intFlag = 0 THEN
+    IF intFlag = 1 THEN
         -- Department filter result set
         SELECT
             IFNULL(DepartmentId, '') AS department_id,
@@ -51,16 +51,16 @@ BEGIN
         ORDER BY mastervalue;
     END IF;
 
-    IF intFlag = 1 THEN
-        IF p_page_number IS NULL OR p_page_number < 1 THEN
-            SET p_page_number = 1;
+    IF intFlag = 2 THEN
+        IF intpagenumber IS NULL OR intpagenumber < 1 THEN
+            SET intpagenumber = 1;
         END IF;
 
-        IF p_page_size IS NULL OR p_page_size < 1 THEN
-            SET p_page_size = 50;
+        IF intpagesize IS NULL OR intpagesize < 1 THEN
+            SET intpagesize = 50;
         END IF;
 
-        SET v_offset = (p_page_number - 1) * p_page_size;
+        SET v_offset = (intpagenumber - 1) * intpagesize;
 
         DROP TEMPORARY TABLE IF EXISTS tmp_master_list;
 
@@ -104,16 +104,16 @@ BEGIN
            AND rm_disc.isactive = 1
         WHERE ed.IsActive = 1
           AND (
-                p_search IS NULL OR p_search = '' OR
-                ed.EmployeeId LIKE CONCAT('%', p_search, '%') OR
-                CONCAT(IFNULL(ed.FirstName, ''), ' ', IFNULL(ed.MiddleName, ''), ' ', IFNULL(ed.LastName, '')) LIKE CONCAT('%', p_search, '%') OR
-                dm.DepartmentName LIKE CONCAT('%', p_search, '%') OR
-                CAST(ed.LocationId AS CHAR) LIKE CONCAT('%', p_search, '%')
+                strsearch IS NULL OR strsearch = '' OR
+                ed.EmployeeId LIKE CONCAT('%', strsearch, '%') OR
+                CONCAT(IFNULL(ed.FirstName, ''), ' ', IFNULL(ed.MiddleName, ''), ' ', IFNULL(ed.LastName, '')) LIKE CONCAT('%', strsearch, '%') OR
+                dm.DepartmentName LIKE CONCAT('%', strsearch, '%') OR
+                CAST(ed.LocationId AS CHAR) LIKE CONCAT('%', strsearch, '%')
               )
-          AND (p_department_id IS NULL OR ed.DepartmentId = p_department_id)
-          AND (p_appraisal_type_id IS NULL OR ed.appraisal_typeID = p_appraisal_type_id)
-          AND (p_location_id IS NULL OR ed.LocationId = p_location_id)
-          AND (p_discussion_status IS NULL OR p_discussion_status = '' OR IFNULL(rm_disc.mastervalue, 'NA') = p_discussion_status);
+          AND (intdepartmentid IS NULL OR ed.DepartmentId = intdepartmentid)
+          AND (intappraisaltypeid IS NULL OR ed.appraisal_typeID = intappraisaltypeid)
+          AND (intlocationid IS NULL OR ed.LocationId = intlocationid)
+          AND (strdiscussionstatus IS NULL OR strdiscussionstatus = '' OR IFNULL(rm_disc.mastervalue, 'NA') = strdiscussionstatus);
 
         SELECT
             employee_det_id,
@@ -131,7 +131,7 @@ BEGIN
             discussion_status
         FROM tmp_master_list
         ORDER BY emp_id ASC
-        LIMIT p_page_size OFFSET v_offset;
+        LIMIT intpagesize OFFSET v_offset;
 
         SELECT COUNT(*) AS total_records FROM tmp_master_list;
 

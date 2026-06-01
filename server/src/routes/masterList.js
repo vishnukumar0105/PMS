@@ -7,7 +7,7 @@ router.get('/master-list/filters', async (_, res) => {
   try {
     const [resultSets] = await pool.query(
       'CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?)',
-      [0, '', null, null, null, '', 1, 50]
+      [1, '', null, null, null, '', 1, 50]
     );
 
     return res.json({
@@ -37,7 +37,7 @@ router.get('/master-list', async (req, res) => {
     const [resultSets] = await pool.query(
       'CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        1,
+        2,
         search,
         departmentId ? Number(departmentId) : null,
         appraisalTypeId ? Number(appraisalTypeId) : null,

@@ -12,13 +12,13 @@ Use `master_list_db_handoff.sql` for the complete DB handoff.
 4. Test with:
 
 ```sql
-CALL sp_hr_master_list_flag_method(0, '', NULL, NULL, NULL, '', 1, 50);
 CALL sp_hr_master_list_flag_method(1, '', NULL, NULL, NULL, '', 1, 50);
+CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
 ```
 
 ## Result sets
 
-### `intFlag = 0`
+### `intFlag = 1`
 Returns four separate result sets:
 
 1. Departments
@@ -26,7 +26,7 @@ Returns four separate result sets:
 3. Locations
 4. Discussion Statuses
 
-### `intFlag = 1`
+### `intFlag = 2`
 Returns two result sets:
 
 1. Master List rows
