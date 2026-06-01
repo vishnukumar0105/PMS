@@ -1,40 +1,110 @@
 import { useEffect, useState } from 'react';
-import { getMasterList } from '../../../services/masterListService';
+import { getMasterList, getMasterListFilters } from '../../../services/masterListService';
+
+const defaultFilters = {
+  search: '',
+  departmentId: '',
+  appraisalTypeId: '',
+  locationId: '',
+  discussionStatus: ''
+};
 
 export default function MasterListPage() {
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [filtersLoading, setFiltersLoading] = useState(true);
+  const [filters, setFilters] = useState(defaultFilters);
+  const [filterOptions, setFilterOptions] = useState({
+    departments: [],
+    appraisalTypes: [],
+    locations: [],
+    discussionStatuses: []
+  });
+
+  const loadRows = async (nextFilters = filters) => {
+    try {
+      setLoading(true);
+      const data = await getMasterList({ ...nextFilters, page: 1, pageSize: 50 });
+      setRows(data.rows || []);
+      setTotal(data.total || 0);
+    } catch (error) {
+      console.error(error);
+      setRows([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
+    const loadInitialData = async () => {
       try {
-        setLoading(true);
-        const data = await getMasterList({ page: 1, pageSize: 50 });
-        setRows(data.rows || []);
-        setTotal(data.total || 0);
+        setFiltersLoading(true);
+        const options = await getMasterListFilters();
+        setFilterOptions({
+          departments: options.departments || [],
+          appraisalTypes: options.appraisalTypes || [],
+          locations: options.locations || [],
+          discussionStatuses: options.discussionStatuses || []
+        });
       } catch (error) {
         console.error(error);
-        setRows([]);
-        setTotal(0);
       } finally {
-        setLoading(false);
+        setFiltersLoading(false);
       }
+
+      await loadRows(defaultFilters);
     };
-    load();
+
+    loadInitialData();
   }, []);
+
+  const updateFilter = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleFilter = () => {
+    loadRows(filters);
+  };
 
   return (
     <div className="master-wrap">
       <div className="master-alert">ℹ Showing employees across all departments. Use filters to narrow by Appraisal Type, Department, or Review Status.</div>
       <div className="master-card">
         <div className="master-filters">
-          <input className="form-control" placeholder="Search by Name, ID, Department, Location..." />
-          <select className="form-select"><option>All Departments</option></select>
-          <select className="form-select"><option>All Appraisal Types</option></select>
-          <select className="form-select"><option>All Locations</option></select>
-          <select className="form-select"><option>All Statuses</option></select>
-          <button className="btn btn-light">Filter ▾</button>
+          <input
+            className="form-control"
+            placeholder="Search by Name, ID, Department, Location..."
+            value={filters.search}
+            onChange={(event) => updateFilter('search', event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleFilter()}
+          />
+          <select className="form-select" value={filters.departmentId} onChange={(event) => updateFilter('departmentId', event.target.value)} disabled={filtersLoading}>
+            <option value="">All Departments</option>
+            {filterOptions.departments.map((department) => (
+              <option key={department.department_id} value={department.department_id}>{department.department_name}</option>
+            ))}
+          </select>
+          <select className="form-select" value={filters.appraisalTypeId} onChange={(event) => updateFilter('appraisalTypeId', event.target.value)} disabled={filtersLoading}>
+            <option value="">All Appraisal Types</option>
+            {filterOptions.appraisalTypes.map((type) => (
+              <option key={type.appraisal_type_id} value={type.appraisal_type_id}>{type.appraisal_type}</option>
+            ))}
+          </select>
+          <select className="form-select" value={filters.locationId} onChange={(event) => updateFilter('locationId', event.target.value)} disabled={filtersLoading}>
+            <option value="">All Locations</option>
+            {filterOptions.locations.map((location) => (
+              <option key={location.location_id} value={location.location_id}>{location.location_name}</option>
+            ))}
+          </select>
+          <select className="form-select" value={filters.discussionStatus} onChange={(event) => updateFilter('discussionStatus', event.target.value)} disabled={filtersLoading}>
+            <option value="">All Statuses</option>
+            {filterOptions.discussionStatuses.map((status) => (
+              <option key={status.discussion_status_id} value={status.discussion_status}>{status.discussion_status}</option>
+            ))}
+          </select>
+          <button className="btn btn-light" onClick={handleFilter} disabled={loading}>Filter ▾</button>
         </div>
 
         {loading ? (
@@ -48,7 +118,9 @@ export default function MasterListPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => {
+                {rows.length === 0 ? (
+                  <tr><td colSpan="14" className="text-center text-secondary py-4">No employees found for selected filters.</td></tr>
+                ) : rows.map((r) => {
                   const attendance = Number(r.attendance_pct || 0);
                   return (
                     <tr key={r.employee_det_id || r.emp_id}>

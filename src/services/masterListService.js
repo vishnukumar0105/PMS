@@ -8,12 +8,16 @@ export async function getMasterList(params = {}) {
     locationId: params.locationId ?? '',
     discussionStatus: params.discussionStatus ?? '',
     page: String(params.page ?? 1),
-    pageSize: String(params.pageSize ?? 50),
-    sortColumn: params.sortColumn ?? 'employeeid',
-    sortDirection: params.sortDirection ?? 'ASC'
+    pageSize: String(params.pageSize ?? 50)
   });
 
   const res = await fetch(`${API_BASE}/hr/master-list?${qs.toString()}`);
   if (!res.ok) throw new Error('Failed to fetch master list');
+  return res.json();
+}
+
+export async function getMasterListFilters() {
+  const res = await fetch(`${API_BASE}/hr/master-list/filters`);
+  if (!res.ok) throw new Error('Failed to fetch master list filters');
   return res.json();
 }
