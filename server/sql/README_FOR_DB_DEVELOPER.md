@@ -12,8 +12,8 @@ Use `master_list_db_handoff.sql` for the complete DB handoff.
 4. Test with:
 
 ```sql
-CALL sp_hr_master_list_flag_method(1, '', NULL, NULL, NULL, '', 1, 50);
-CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
+CALL Getmasterlistmethod(1, '', NULL, NULL, NULL, '', 1, 50);
+CALL Getmasterlistmethod(2, '', NULL, NULL, NULL, '', 1, 50);
 ```
 
 ## Result sets
@@ -37,11 +37,11 @@ Returns two result sets:
 The Express API calls:
 
 ```sql
-CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?);
+CALL Getmasterlistmethod(?, ?, ?, ?, ?, ?, ?, ?);
 ```
 
 So this procedure name and parameter order should not be changed without also updating `server/src/routes/masterList.js`.
 
 ## Collation note
 
-If API logs show `Illegal mix of collations ... for operation 'like'`, re-run the latest `sp_hr_master_list_flag_method.sql` file. The current version normalizes search inputs and compared columns to `utf8mb4_unicode_ci` before `LIKE` comparisons.
+If API logs show `Illegal mix of collations ... for operation 'like'`, re-run the latest `Getmasterlistmethod.sql` file. The current version normalizes search inputs and compared columns to `utf8mb4_unicode_ci` before `LIKE` comparisons.

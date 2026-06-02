@@ -1,7 +1,7 @@
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sp_hr_master_list_flag_method $$
-CREATE PROCEDURE sp_hr_master_list_flag_method(
+DROP PROCEDURE IF EXISTS Getmasterlistmethod $$
+CREATE PROCEDURE Getmasterlistmethod(
     IN intFlag INT,
     IN strsearch VARCHAR(150),
     IN intdepartmentid BIGINT,

@@ -9,6 +9,8 @@ const defaultFilters = {
   discussionStatus: ''
 };
 
+const pageSizeOptions = [10, 20, 50, 'all'];
+
 export default function MasterListPage() {
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
@@ -16,6 +18,9 @@ export default function MasterListPage() {
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [filters, setFilters] = useState(defaultFilters);
+  const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [filterOptions, setFilterOptions] = useState({
     departments: [],
     appraisalTypes: [],
@@ -23,11 +28,18 @@ export default function MasterListPage() {
     discussionStatuses: []
   });
 
-  const loadRows = async (nextFilters = filters) => {
+  const isAllRows = pageSize === 'all';
+  const effectivePageSize = isAllRows ? Math.max(total, 1) : Number(pageSize);
+  const totalPages = isAllRows ? 1 : Math.max(1, Math.ceil(total / effectivePageSize));
+  const startRow = total === 0 ? 0 : (page - 1) * effectivePageSize + 1;
+  const endRow = total === 0 ? 0 : Math.min(page * effectivePageSize, total);
+
+  const loadRows = async (nextFilters = appliedFilters, nextPage = page, nextPageSize = pageSize) => {
     try {
       setLoading(true);
       setErrorMessage('');
-      const data = await getMasterList({ ...nextFilters, page: 1, pageSize: 50 });
+      const apiPageSize = nextPageSize === 'all' ? 100000 : Number(nextPageSize);
+      const data = await getMasterList({ ...nextFilters, page: nextPage, pageSize: apiPageSize });
       setRows(data.rows || []);
       setTotal(data.total || 0);
     } catch (error) {
@@ -59,7 +71,7 @@ export default function MasterListPage() {
         setFiltersLoading(false);
       }
 
-      await loadRows(defaultFilters);
+      await loadRows(defaultFilters, 1, 10);
     };
 
     loadInitialData();
@@ -70,8 +82,30 @@ export default function MasterListPage() {
   };
 
   const handleFilter = () => {
-    loadRows(filters);
+    setAppliedFilters(filters);
+    setPage(1);
+    loadRows(filters, 1, pageSize);
   };
+
+  const handlePageChange = (nextPage) => {
+    const safePage = Math.min(Math.max(nextPage, 1), totalPages);
+    setPage(safePage);
+    loadRows(appliedFilters, safePage, pageSize);
+  };
+
+  const handlePageSizeChange = (value) => {
+    const nextPageSize = value === 'all' ? 'all' : Number(value);
+    setPageSize(nextPageSize);
+    setPage(1);
+    loadRows(appliedFilters, 1, nextPageSize);
+  };
+
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+    .filter((pageNumber) => (
+      pageNumber === 1 ||
+      pageNumber === totalPages ||
+      Math.abs(pageNumber - page) <= 2
+    ));
 
   return (
     <div className="master-wrap">
@@ -155,7 +189,30 @@ export default function MasterListPage() {
           </div>
         )}
 
-        <div className="master-footer"><span>1-50 of {total} Employees</span><span>Rows per Page 50 · Page 1 / {Math.max(1, Math.ceil(total / 50))}</span></div>
+        <div className="master-footer">
+          <span>{startRow}-{endRow} of {total} Employees</span>
+          <div className="master-pagination">
+            <span>Rows per Page</span>
+            <select className="form-select form-select-sm page-size-select" value={pageSize} onChange={(event) => handlePageSizeChange(event.target.value)} disabled={loading}>
+              {pageSizeOptions.map((option) => <option key={option} value={option}>{option === 'all' ? 'All' : option}</option>)}
+            </select>
+            <button className="page-btn" onClick={() => handlePageChange(1)} disabled={loading || page === 1 || isAllRows}>«</button>
+            <button className="page-btn" onClick={() => handlePageChange(page - 1)} disabled={loading || page === 1 || isAllRows}>‹</button>
+            {pageNumbers.map((pageNumber, index) => (
+              <button
+                key={pageNumber}
+                className={`page-btn ${pageNumber === page ? 'active' : ''}`}
+                onClick={() => handlePageChange(pageNumber)}
+                disabled={loading || isAllRows}
+              >
+                {index > 0 && pageNumber - pageNumbers[index - 1] > 1 ? `… ${pageNumber}` : pageNumber}
+              </button>
+            ))}
+            <button className="page-btn" onClick={() => handlePageChange(page + 1)} disabled={loading || page === totalPages || isAllRows}>›</button>
+            <button className="page-btn" onClick={() => handlePageChange(totalPages)} disabled={loading || page === totalPages || isAllRows}>»</button>
+            <span>Page {page} / {totalPages}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

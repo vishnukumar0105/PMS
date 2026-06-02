@@ -77,13 +77,13 @@ If the user already exists with a different host, DB developer may need to updat
 
 ## Step 4: Confirm database and SP exist
 
-After DB login works, the API expects database `pms_devp` and procedure `sp_hr_master_list_flag_method`.
+After DB login works, the API expects database `pms_devp` and procedure `Getmasterlistmethod`.
 
 ```sql
 USE pms_devp;
-SHOW PROCEDURE STATUS WHERE Db = 'pms_devp' AND Name = 'sp_hr_master_list_flag_method';
-CALL sp_hr_master_list_flag_method(1, '', NULL, NULL, NULL, '', 1, 50);
-CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
+SHOW PROCEDURE STATUS WHERE Db = 'pms_devp' AND Name = 'Getmasterlistmethod';
+CALL Getmasterlistmethod(1, '', NULL, NULL, NULL, '', 1, 50);
+CALL Getmasterlistmethod(2, '', NULL, NULL, NULL, '', 1, 50);
 ```
 
 ## Will the UI show data after this error is fixed?
@@ -91,7 +91,7 @@ CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
 Yes, the Master List UI should load data after this access error is fixed, if:
 
 1. `dev` can connect to `pms_devp` from the API machine.
-2. `sp_hr_master_list_flag_method` exists.
+2. `Getmasterlistmethod` exists.
 3. The required tables/columns exist.
 4. The tables have active employee rows matching the filters.
 
@@ -109,11 +109,11 @@ then the stored procedure in MySQL is still using mixed collations while compari
 
 Fix:
 
-1. DB developer should re-run the latest `server/sql/sp_hr_master_list_flag_method.sql`.
+1. DB developer should re-run the latest `server/sql/Getmasterlistmethod.sql`.
 2. The latest SP converts search and discussion-status values to `utf8mb4_unicode_ci` before comparing.
 3. Restart API after DB developer updates the procedure.
 
-Important: if `/api/hr/master-list/filters` shows this error and the SQL log says `CALL sp_hr_master_list_flag_method(1, ...)`, it usually means the DB still has an older SP where `intFlag = 1` was table/search logic. In the latest SP:
+Important: if `/api/hr/master-list/filters` shows this error and the SQL log says `CALL Getmasterlistmethod(1, ...)`, it usually means the DB still has an older SP where `intFlag = 1` was table/search logic. In the latest SP:
 
 - `intFlag = 1` = dropdown/filter result sets only
 - `intFlag = 2` = table data and search/filter logic

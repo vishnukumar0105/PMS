@@ -16,7 +16,7 @@ function sendDbError(res, error, message) {
 router.get('/master-list/filters', async (_, res) => {
   try {
     const [resultSets] = await pool.query(
-      'CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?)',
+      'CALL Getmasterlistmethod(?, ?, ?, ?, ?, ?, ?, ?)',
       [1, '', null, null, null, '', 1, 50]
     );
 
@@ -44,7 +44,7 @@ router.get('/master-list', async (req, res) => {
     } = req.query;
 
     const [resultSets] = await pool.query(
-      'CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?)',
+      'CALL Getmasterlistmethod(?, ?, ?, ?, ?, ?, ?, ?)',
       [
         2,
         search,

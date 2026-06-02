@@ -7,7 +7,7 @@
 -- IMPORTANT FOR DB DEVELOPER:
 -- - If these base tables already exist, do NOT drop production data.
 -- - Review CREATE/ALTER statements and apply only missing columns/tables.
--- - API calls: CALL sp_hr_master_list_flag_method(...)
+-- - API calls: CALL Getmasterlistmethod(...)
 --   intFlag = 1 => dropdown/filter result sets
 --   intFlag = 2 => master list rows + total count
 
@@ -138,8 +138,8 @@ CREATE TABLE IF NOT EXISTS reviewcycle (
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sp_hr_master_list_flag_method $$
-CREATE PROCEDURE sp_hr_master_list_flag_method(
+DROP PROCEDURE IF EXISTS Getmasterlistmethod $$
+CREATE PROCEDURE Getmasterlistmethod(
     IN intFlag INT,
     IN strsearch VARCHAR(150),
     IN intdepartmentid BIGINT,
@@ -283,10 +283,10 @@ DELIMITER ;
 -- Test calls for DB developer
 -- ---------------------------------------------------------------------------
 -- Dropdown/filter data:
--- CALL sp_hr_master_list_flag_method(1, '', NULL, NULL, NULL, '', 1, 50);
+-- CALL Getmasterlistmethod(1, '', NULL, NULL, NULL, '', 1, 50);
 --
 -- Table data without filters:
--- CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
+-- CALL Getmasterlistmethod(2, '', NULL, NULL, NULL, '', 1, 50);
 --
 -- Table data with filters example:
--- CALL sp_hr_master_list_flag_method(2, 'Employee', 1, 1, 1, 'Approved', 1, 50);
+-- CALL Getmasterlistmethod(2, 'Employee', 1, 1, 1, 'Approved', 1, 50);

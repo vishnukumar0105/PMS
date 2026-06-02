@@ -302,3 +302,9 @@ body {
 @media (max-width: 1400px) {
   .master-filters { grid-template-columns:1fr 1fr; }
 }
+
+.master-pagination { display:flex; align-items:center; justify-content:flex-end; gap:6px; flex-wrap:wrap; }
+.page-size-select { width:auto; min-width:72px; }
+.page-btn { min-width:30px; height:30px; border:1px solid #cbd8d0; border-radius:6px; background:#fff; color:#2c5d45; font-size:13px; display:inline-flex; align-items:center; justify-content:center; padding:0 8px; }
+.page-btn:hover:not(:disabled), .page-btn.active { background:#2d8c73; border-color:#2d8c73; color:#fff; }
+.page-btn:disabled { opacity:.45; cursor:not-allowed; }
