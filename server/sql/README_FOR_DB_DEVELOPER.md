@@ -41,3 +41,7 @@ CALL sp_hr_master_list_flag_method(?, ?, ?, ?, ?, ?, ?, ?);
 ```
 
 So this procedure name and parameter order should not be changed without also updating `server/src/routes/masterList.js`.
+
+## Collation note
+
+If API logs show `Illegal mix of collations ... for operation 'like'`, re-run the latest `sp_hr_master_list_flag_method.sql` file. The current version normalizes search inputs and compared columns to `utf8mb4_unicode_ci` before `LIKE` comparisons.

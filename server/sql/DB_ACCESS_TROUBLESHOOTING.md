@@ -96,3 +96,24 @@ Yes, the Master List UI should load data after this access error is fixed, if:
 4. The tables have active employee rows matching the filters.
 
 If the DB/SP works but no employees match, UI will show the empty table message instead of an access error.
+
+## Step 5: Illegal mix of collations on `LIKE`
+
+If terminal shows:
+
+```text
+Illegal mix of collations (utf8mb4_0900_ai_ci,IMPLICIT) and (utf8mb4_unicode_ci,IMPLICIT) for operation 'like'
+```
+
+then the stored procedure in MySQL is still using mixed collations while comparing search text with employee/department fields.
+
+Fix:
+
+1. DB developer should re-run the latest `server/sql/sp_hr_master_list_flag_method.sql`.
+2. The latest SP converts search and discussion-status values to `utf8mb4_unicode_ci` before comparing.
+3. Restart API after DB developer updates the procedure.
+
+Important: if `/api/hr/master-list/filters` shows this error and the SQL log says `CALL sp_hr_master_list_flag_method(1, ...)`, it usually means the DB still has an older SP where `intFlag = 1` was table/search logic. In the latest SP:
+
+- `intFlag = 1` = dropdown/filter result sets only
+- `intFlag = 2` = table data and search/filter logic

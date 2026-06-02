@@ -13,6 +13,8 @@ CREATE PROCEDURE sp_hr_master_list_flag_method(
 )
 BEGIN
     DECLARE v_offset INT DEFAULT 0;
+    DECLARE v_search VARCHAR(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '';
+    DECLARE v_discussion_status VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '';
 
     IF intFlag = 1 THEN
         -- Department filter result set
@@ -52,6 +54,9 @@ BEGIN
     END IF;
 
     IF intFlag = 2 THEN
+        SET v_search = CONVERT(IFNULL(strsearch, '') USING utf8mb4) COLLATE utf8mb4_unicode_ci;
+        SET v_discussion_status = CONVERT(IFNULL(strdiscussionstatus, '') USING utf8mb4) COLLATE utf8mb4_unicode_ci;
+
         IF intpagenumber IS NULL OR intpagenumber < 1 THEN
             SET intpagenumber = 1;
         END IF;
@@ -104,16 +109,16 @@ BEGIN
            AND rm_disc.isactive = 1
         WHERE ed.IsActive = 1
           AND (
-                strsearch IS NULL OR strsearch = '' OR
-                ed.EmployeeId LIKE CONCAT('%', strsearch, '%') OR
-                CONCAT(IFNULL(ed.FirstName, ''), ' ', IFNULL(ed.MiddleName, ''), ' ', IFNULL(ed.LastName, '')) LIKE CONCAT('%', strsearch, '%') OR
-                dm.DepartmentName LIKE CONCAT('%', strsearch, '%') OR
-                CAST(ed.LocationId AS CHAR) LIKE CONCAT('%', strsearch, '%')
+                v_search = '' OR
+                CONVERT(IFNULL(ed.EmployeeId, '') USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', v_search, '%') OR
+                CONVERT(CONCAT(IFNULL(ed.FirstName, ''), ' ', IFNULL(ed.MiddleName, ''), ' ', IFNULL(ed.LastName, '')) USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', v_search, '%') OR
+                CONVERT(IFNULL(dm.DepartmentName, '') USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', v_search, '%') OR
+                CONVERT(CAST(ed.LocationId AS CHAR) USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', v_search, '%')
               )
           AND (intdepartmentid IS NULL OR ed.DepartmentId = intdepartmentid)
           AND (intappraisaltypeid IS NULL OR ed.appraisal_typeID = intappraisaltypeid)
           AND (intlocationid IS NULL OR ed.LocationId = intlocationid)
-          AND (strdiscussionstatus IS NULL OR strdiscussionstatus = '' OR IFNULL(rm_disc.mastervalue, 'NA') = strdiscussionstatus);
+          AND (v_discussion_status = '' OR CONVERT(IFNULL(rm_disc.mastervalue, 'NA') USING utf8mb4) COLLATE utf8mb4_unicode_ci = v_discussion_status);
 
         SELECT
             employee_det_id,
