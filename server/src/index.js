@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import masterListRoutes from './routes/masterList.js';
+import diagnosticRoutes from './routes/diagnostics.js';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 app.use('/api/hr', masterListRoutes);
+app.use('/api/diagnostics', diagnosticRoutes);
 
 const port = Number(process.env.PORT || 5000);
 app.listen(port, () => {

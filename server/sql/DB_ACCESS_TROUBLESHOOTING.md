@@ -6,9 +6,43 @@ If the UI/API shows this error:
 Access denied for user 'dev'@'<machine-name>' (using password: YES)
 ```
 
-check these items with the DB developer.
+this is a MySQL login/permission issue before the stored procedure runs.
 
-## 1. Password contains `#`
+## Important: `dev@IE130.InformationEvolution.com` is not an email
+
+MySQL accounts are checked as:
+
+```text
+'user_name'@'client_host'
+```
+
+So this error:
+
+```text
+'dev'@'IE130.InformationEvolution.com'
+```
+
+means:
+
+- MySQL username: `dev`
+- Client/API machine name seen by MySQL: `IE130.InformationEvolution.com`
+
+It is not a mail ID and it will not appear in frontend code.
+
+## Step 1: Confirm API is reading the expected DB config
+
+Start the server, then open:
+
+```text
+http://localhost:5000/api/diagnostics/db
+```
+
+This endpoint never returns the password. It returns host, database, username, API machine name, and either:
+
+- successful MySQL `CURRENT_USER()` details, or
+- the exact MySQL error.
+
+## Step 2: Password contains `#`
 
 The password in `server/.env` is quoted because `#` can be treated as a comment marker by env parsers.
 
@@ -18,30 +52,32 @@ MYSQL_PASSWORD="Cent@#321"
 
 Restart the Express API after changing `.env`.
 
-## 2. MySQL user host permission
+## Step 3: MySQL user host permission
 
-The error includes the client machine/host, for example:
-
-```text
-'dev'@'IE130.InformationEvolution.com'
-```
-
-That means MySQL is checking whether user `dev` is allowed to connect from that host. If password quoting is correct and the error still appears, the DB developer should grant access for this host/IP or `%` according to company policy.
+If password quoting is correct and the error still appears, the DB developer should grant access for the host shown in the error (`IE130.InformationEvolution.com`) or the API machine IP.
 
 Example for DB developer only:
 
 ```sql
 -- Prefer a specific host/IP if possible instead of '%'.
+CREATE USER IF NOT EXISTS 'dev'@'IE130.InformationEvolution.com' IDENTIFIED BY 'Cent@#321';
+GRANT EXECUTE, SELECT ON pms_devp.* TO 'dev'@'IE130.InformationEvolution.com';
+FLUSH PRIVILEGES;
+```
+
+If DB policy allows wildcard host temporarily for testing:
+
+```sql
 CREATE USER IF NOT EXISTS 'dev'@'%' IDENTIFIED BY 'Cent@#321';
 GRANT EXECUTE, SELECT ON pms_devp.* TO 'dev'@'%';
 FLUSH PRIVILEGES;
 ```
 
-If the user already exists with a different host, the DB developer may need to update that account or create a host-specific account.
+If the user already exists with a different host, DB developer may need to update that exact account or create a host-specific account.
 
-## 3. Confirm database and SP exist
+## Step 4: Confirm database and SP exist
 
-The API expects database `pms_devp` and procedure `sp_hr_master_list_flag_method`.
+After DB login works, the API expects database `pms_devp` and procedure `sp_hr_master_list_flag_method`.
 
 ```sql
 USE pms_devp;
@@ -49,3 +85,14 @@ SHOW PROCEDURE STATUS WHERE Db = 'pms_devp' AND Name = 'sp_hr_master_list_flag_m
 CALL sp_hr_master_list_flag_method(1, '', NULL, NULL, NULL, '', 1, 50);
 CALL sp_hr_master_list_flag_method(2, '', NULL, NULL, NULL, '', 1, 50);
 ```
+
+## Will the UI show data after this error is fixed?
+
+Yes, the Master List UI should load data after this access error is fixed, if:
+
+1. `dev` can connect to `pms_devp` from the API machine.
+2. `sp_hr_master_list_flag_method` exists.
+3. The required tables/columns exist.
+4. The tables have active employee rows matching the filters.
+
+If the DB/SP works but no employees match, UI will show the empty table message instead of an access error.
